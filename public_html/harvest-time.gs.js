@@ -54,7 +54,7 @@ function invoiceHours() {
     var url = 'https://api.harvestapp.com/api/v2/time_entries?from=' + from + '&to=' + to;
 
     var headers = {
-      "User-Agent": "Google Apps Script Harvest API Sample",
+      "User-Agent": "Google Apps Script Harvest API Invoice",
       "Authorization": "Bearer " + config.harvest.accessToken,
       "Harvest-Account-ID": config.harvest.accountID
     };
@@ -73,7 +73,7 @@ function invoiceHours() {
     return hoursHarvest;
   }
 
-  function getHoursProjectsFromResponse(jsonTimeEntries) {
+  function getHoursProjectsFromResponse(timeEntries) {
     var jsonTimeEntriesObj = JSON.parse(timeEntries);
     Logger.log('=====4=========jsonTimeEntriesObj[\'time_entries\']' + jsonTimeEntriesObj['time_entries']);
 
@@ -83,12 +83,11 @@ function invoiceHours() {
       
       var thisTime = jsonTimeEntriesObj['time_entries'][i];
       var projectName = thisTime['project']['name'];
-      if(projects[projectName]){
-        projects[projectName].hours += thisTime['hours'];
+      if(!projects[projectName]){
+        projects[projectName] = { hours: thisTime['hours'] };
       }else{
-        projects[projectName].hours = thisTime['hours']
+        projects[projectName].hours += thisTime['hours']
       }
-
 
       Logger.log('thisTime', thisTime['hours']);
       hours += thisTime['hours'];
@@ -128,11 +127,12 @@ function invoiceHours() {
     //set hours put in cell G17, which is calced auto
     var hoursProjectsWorked = getHoursFromHarvest(dateLastMonth);
 
+    var row = 17; 
     for( var p in hoursProjectsWorked){
-      var row = 17; 
       var project = p;
-      var hours = hoursProjectsWorked[p];
+      var hours = Math.ceil( hoursProjectsWorked[p].hours);
 
+      Logger.log('project', project, 'hours', hours);
       
       //set description in cell C17, may get from data? todo.
       var descriptionWorked = project + monthName + ' ' + dateLastMonth.getYear();
