@@ -79,34 +79,34 @@ function invoiceHours() {
 
     var projects = {};
     for (var i = 0; i < jsonTimeEntriesObj['time_entries'].length; i++) {
-      
+
       var thisTime = jsonTimeEntriesObj['time_entries'][i];
       var projectName = thisTime['project']['name'];
-      if(!projects[projectName]){
+      if (!projects[projectName]) {
         projects[projectName] = { hours: thisTime['hours'] };
-      }else{
+      } else {
         projects[projectName].hours += thisTime['hours']
       }
 
       Logger.log('thisTime', thisTime['hours']);
     }
 
-    Logger.log('HOURS added  RAWWWW' + hours, projects);
-     return projects;
+    Logger.log('HOURS projects', projects);
+    return projects;
   }
 
   /** loop thru the totals rows from C17 and add them from the projects object */
-  function setTotalRows(ssClone, hoursProjectsWorked) {
+  function setTotalRows(ssClone, hoursProjectsWorked, monthName, dateLastMonth) {
 
-    var row = 17; 
-    for( var p in hoursProjectsWorked){
+    var row = 17;
+    for (var p in hoursProjectsWorked) {
       var project = p;
-      var hours = Math.ceil( hoursProjectsWorked[p].hours);
+      var hours = Math.ceil(hoursProjectsWorked[p].hours);
 
       Logger.log('project', project, 'hours', hours);
-      
+
       //set description in cell C17, may get from data? todo.
-      var descriptionWorked = project + monthName + ' ' + dateLastMonth.getYear();
+      var descriptionWorked = project + ' ' + monthName + ' ' + dateLastMonth.getYear();
       ssClone.getRange('C' + row).setValue(descriptionWorked);
       ssClone.getRange('G' + row).setValue(hours);
 
@@ -144,9 +144,9 @@ function invoiceHours() {
     //set hours put in cell G17, which is calced auto
     var hoursProjectsWorked = getHoursFromHarvest(dateLastMonth);
 
-    setTotalRows(ssClone, hoursProjectsWorked);
+    setTotalRows(ssClone, hoursProjectsWorked, monthName, dateLastMonth);
 
-  
+
     //share to emails list if 1st of month.,  otherwise testing and not spamming.
     if (dateLastMonth.getDate() === 1) {
       newFile.addViewer(config.emails[0]);
