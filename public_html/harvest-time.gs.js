@@ -9,7 +9,7 @@ function invoiceHours() {
       name: 'Michael Hazzard'
     },
     drive: {
-      // get these ids by opening the folder or doc in google drive, and its in the url 
+      // get these ids by opening the folder or doc in google drive, and its in the url if you click thrue in the google drive UI.
       folder: '15L8--zzIjdUP4h7Xwv_-QXWTePRLjq1B',
       template: '1Nj6MIJwnGeLKKu3PsgMAgu9Lfq62i5v3NV8OWYrxYLo'
     },
@@ -73,12 +73,11 @@ function invoiceHours() {
     return hoursHarvest;
   }
 
+  /** parse out the json, push into totalled summed object like { 'projectA': {hours: 33}, 'projectB': {hours: 55}} */
   function getHoursProjectsFromResponse(timeEntries) {
     var jsonTimeEntriesObj = JSON.parse(timeEntries);
-    Logger.log('=====4=========jsonTimeEntriesObj[\'time_entries\']' + jsonTimeEntriesObj['time_entries']);
 
     var projects = {};
-    var hours = 0;
     for (var i = 0; i < jsonTimeEntriesObj['time_entries'].length; i++) {
       
       var thisTime = jsonTimeEntriesObj['time_entries'][i];
@@ -90,12 +89,30 @@ function invoiceHours() {
       }
 
       Logger.log('thisTime', thisTime['hours']);
-      hours += thisTime['hours'];
     }
 
     Logger.log('HOURS added  RAWWWW' + hours, projects);
-     //  return Math.ceil(hours);
      return projects;
+  }
+
+  /** loop thru the totals rows from C17 and add them from the projects object */
+  function setTotalRows(ssClone, hoursProjectsWorked) {
+
+    var row = 17; 
+    for( var p in hoursProjectsWorked){
+      var project = p;
+      var hours = Math.ceil( hoursProjectsWorked[p].hours);
+
+      Logger.log('project', project, 'hours', hours);
+      
+      //set description in cell C17, may get from data? todo.
+      var descriptionWorked = project + monthName + ' ' + dateLastMonth.getYear();
+      ssClone.getRange('C' + row).setValue(descriptionWorked);
+      ssClone.getRange('G' + row).setValue(hours);
+
+      row++;
+    }
+
   }
 
   function init(monthsBack) {
@@ -127,20 +144,7 @@ function invoiceHours() {
     //set hours put in cell G17, which is calced auto
     var hoursProjectsWorked = getHoursFromHarvest(dateLastMonth);
 
-    var row = 17; 
-    for( var p in hoursProjectsWorked){
-      var project = p;
-      var hours = Math.ceil( hoursProjectsWorked[p].hours);
-
-      Logger.log('project', project, 'hours', hours);
-      
-      //set description in cell C17, may get from data? todo.
-      var descriptionWorked = project + monthName + ' ' + dateLastMonth.getYear();
-      ssClone.getRange('C' + row).setValue(descriptionWorked);
-      ssClone.getRange('G' + row).setValue(hours);
-
-      row++;
-    }
+    setTotalRows(ssClone, hoursProjectsWorked);
 
   
     //share to emails list if 1st of month.,  otherwise testing and not spamming.
