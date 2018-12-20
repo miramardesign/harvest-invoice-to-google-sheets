@@ -183,7 +183,7 @@ var utils = {
             'Sábado'
         ];
         return daysOfWeekEs[dayI];
-    },
+    }, 
     /**
      * row where dates are
      * @type Number
