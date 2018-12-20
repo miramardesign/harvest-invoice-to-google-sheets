@@ -38,7 +38,6 @@ function invoiceHours() {
 
   /**
    *   // 0 = jan -> 01 = jan
-
    * @param {*} zeroBasedMonth 
    */
   function zeroBasedMonthToPaddedMonth(zeroBasedMonth) {
@@ -121,7 +120,6 @@ function invoiceHours() {
 
       Logger.log('project', project, 'hours', hours);
 
-      //set description in cell C17, may get from data? todo.
       var descriptionWorked = project + ' ' + monthName + ' ' + dateLastMonth.getYear();
       ssClone.getRange('C' + row).setValue(descriptionWorked);
       ssClone.getRange('G' + row).setValue(hours);
@@ -133,12 +131,12 @@ function invoiceHours() {
   
   /**
    * Michael Hazzard Invoice -- Template Script  -> to like ->  Michael Hazzard Invoice for November 2018  timestamp
-   * @param {ss} ssOrig original spreadsheet ss
+   * @param {string} fileNameOrig original spreadsheet ss
    * @param {string} monthName  month name last month
    * @param {*} dateLastMonth date object last month
    */
-  function getFileName(ssOrig, monthName, dateLastMonth){
-    return ssOrig.fileName.split('--')[0] + ' for ' + monthName + ' ' + dateLastMonth.getYear() + ' ' + dateLastMonth.toLocaleTimeString();
+  function getFileName(fileNameOrig, monthName, dateLastMonth){
+    return fileNameOrig.split('--')[0] + ' for ' + monthName + ' ' + dateLastMonth.getYear() + ' ' + dateLastMonth.toLocaleTimeString();
   }
 
   /**
@@ -149,8 +147,12 @@ function invoiceHours() {
 
     //increment invoice num before cloning dock.
     var ssOrig = SpreadsheetApp.getActiveSpreadsheet();
+    var fileNameOrig = ssOrig.getName();
+    Logger.log('filename orig77777777777777', fileNameOrig);
+
     var lastInvoice = ssOrig.getRange('B2').getValue();
     ssOrig.getRange('B2').setValue(lastInvoice + 1);
+   
     SpreadsheetApp.flush(); //save the sheet
 
     //clone the doc at the beginning of the month
@@ -158,13 +160,13 @@ function invoiceHours() {
     dateLastMonth.setMonth(dateLastMonth.getMonth() - monthsBack);
 
     var monthName = getMonthName(dateLastMonth.getMonth())
-    var fileName = getFileName(ssOrig, monthName, dateLastMonth);
 
     var file = DriveApp.getFileById(config.drive.template); //'Michael Hazzard Invoice -- Template'
     //put your template invoice in a folder in drive/ click on it and get the id from the url
     var folder = DriveApp.getFolderById(config.drive.folder); // 'invoices'
-
-    var newFile = file.makeCopy(fileName, folder);
+    
+    var fileNameClone = getFileName(fileNameOrig, monthName, dateLastMonth);
+    var newFile = file.makeCopy(fileNameClone, folder);
 
     var ssClone = SpreadsheetApp.openById(newFile.getId());
     SpreadsheetApp.setActiveSpreadsheet(ssClone);
