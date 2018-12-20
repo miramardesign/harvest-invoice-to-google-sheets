@@ -5,9 +5,6 @@ function invoiceHours() {
   //add a trigger, on first of month. 
   //update the config below
   var config = {
-    user: {
-      name: 'Michael Hazzard'
-    },
     drive: {
       // get these ids by opening the folder or doc in google drive, and its in the url if you click thrue in the google drive UI.
       folder: '15L8--zzIjdUP4h7Xwv_-QXWTePRLjq1B',
@@ -31,18 +28,28 @@ function invoiceHours() {
     return s;
   }
 
+  /**
+   * get english month name
+   * @param {*} i 
+   */
   function getMonthName(i) {
     return ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][i];
   }
 
-  // 0 = jan -> 01 = jan
+  /**
+   *   // 0 = jan -> 01 = jan
+
+   * @param {*} zeroBasedMonth 
+   */
   function zeroBasedMonthToPaddedMonth(zeroBasedMonth) {
     var addedMonth = zeroBasedMonth + 1;
     return addedMonth.pad(2);
   }
-
-  //update from harvest using their api, get total hours for the last month,
-  //https://help.getharvest.com/api-v2/authentication-api/authentication/authentication/
+  /**
+   *  //update from harvest using their api, get total hours for the last month,
+   *  //https://help.getharvest.com/api-v2/authentication-api/authentication/authentication/
+   * @param {*} dateLastMonth 
+   */
   function getHoursFromHarvest(dateLastMonth) {
 
     var from = dateLastMonth.getYear() + '-' + zeroBasedMonthToPaddedMonth(dateLastMonth.getMonth()) + '-01';
@@ -73,7 +80,10 @@ function invoiceHours() {
     return hoursHarvest;
   }
 
-  /** parse out the json, push into totalled summed object like { 'projectA': {hours: 33}, 'projectB': {hours: 55}} */
+  /**
+   * parse out the json, push into totalled summed object like { 'projectA': {hours: 33}, 'projectB': {hours: 55}} 
+   * @param {*} timeEntries response from harvest RAW
+   */
   function getHoursProjectsFromResponse(timeEntries) {
     var jsonTimeEntriesObj = JSON.parse(timeEntries);
 
@@ -95,7 +105,13 @@ function invoiceHours() {
     return projects;
   }
 
-  /** loop thru the totals rows from C17 and add them from the projects object */
+  /**
+   * loop thru the totals rows from C17 and add them from the projects object
+   * @param {*} ssClone spreadsheet coy
+   * @param {*} hoursProjectsWorked object w/ hours and projects names
+   * @param {*} monthName last month name,
+   * @param {*} dateLastMonth date object last month.
+   */
   function setTotalRows(ssClone, hoursProjectsWorked, monthName, dateLastMonth) {
 
     var row = 17;
@@ -114,12 +130,25 @@ function invoiceHours() {
     }
 
   }
+  
+  /**
+   * Michael Hazzard Invoice -- Template Script  -> to like ->  Michael Hazzard Invoice for November 2018  timestamp
+   * @param {ss} ssOrig original spreadsheet ss
+   * @param {string} monthName  month name last month
+   * @param {*} dateLastMonth date object last month
+   */
+  function getFileName(ssOrig, monthName, dateLastMonth){
+    return ssOrig.fileName.split('--')[0] + ' for ' + monthName + ' ' + dateLastMonth.getYear() + ' ' + dateLastMonth.toLocaleTimeString();
+  }
 
+  /**
+   * run the thing
+   * @param {date} monthsBack 
+   */
   function init(monthsBack) {
 
     //increment invoice num before cloning dock.
     var ssOrig = SpreadsheetApp.getActiveSpreadsheet();
-
     var lastInvoice = ssOrig.getRange('B2').getValue();
     ssOrig.getRange('B2').setValue(lastInvoice + 1);
     SpreadsheetApp.flush(); //save the sheet
@@ -129,10 +158,9 @@ function invoiceHours() {
     dateLastMonth.setMonth(dateLastMonth.getMonth() - monthsBack);
 
     var monthName = getMonthName(dateLastMonth.getMonth())
-    var fileName = config.user.name + ' for ' + monthName + ' ' + dateLastMonth.getYear() + ' ' + dateLastMonth.toLocaleTimeString();
+    var fileName = getFileName(ssOrig, monthName, dateLastMonth);
 
     var file = DriveApp.getFileById(config.drive.template); //'Michael Hazzard Invoice -- Template'
-    file
     //put your template invoice in a folder in drive/ click on it and get the id from the url
     var folder = DriveApp.getFolderById(config.drive.folder); // 'invoices'
 
