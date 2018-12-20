@@ -8,11 +8,7 @@
 //IDENTIFIER HAS TO BE A SUBSTRING OF THE USERS NAME.
 var users = {
     //really should look up the row.
-    'Hazzard': {email: 'michael@7lfreight.com', daily: true, weekly: true},
-    'hazzard': {email: 'miramardesign@gmail.com', daily: true, weekly: true}, //send to phone :)
-    'abaroa': {email: 'jabaroa@shipprimus.com', daily: true, weekly: true},
-    'Laura': {email: 'laura@7lfreight.com',  daily: true, weekly: true},
-    'alfonso': {email: 'alfonso@7lfreight.com', daily: true, weekly: true}
+    'Hazzard': {email: 't.com', daily: true, weekly: true},
 };
 
 //wrap console into logger for testing, to see: view->logs
